@@ -1,0 +1,155 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>表格图片识别转换工具</title>
+    <link rel="stylesheet" href="style.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/toastify-js/1.12.0/toastify.min.css">
+</head>
+<body>
+    <div class="container">
+        <!-- 头部 -->
+        <header class="header">
+            <div class="logo">
+                <i class="fas fa-table"></i>
+                <h1>表格图片识别转换工具</h1>
+            </div>
+            <p class="subtitle">上传包含表格的图片，自动识别并转换为 Excel 文件</p>
+        </header>
+
+        <!-- 主内容区 -->
+        <main class="main-content">
+            <!-- 上传区域 -->
+            <div class="upload-section">
+                <div class="upload-area" id="uploadArea">
+                    <div class="upload-icon">
+                        <i class="fas fa-cloud-upload-alt"></i>
+                    </div>
+                    <h3>拖放文件到此处 或 点击选择</h3>
+                    <p class="upload-hint">支持 PNG, JPG, JPEG, BMP 格式，建议图片清晰</p>
+                    <input type="file" id="fileInput" accept=".png,.jpg,.jpeg,.bmp,.tiff" multiple>
+                    <label for="fileInput" class="btn btn-primary">
+                        <i class="fas fa-folder-open"></i> 选择图片
+                    </label>
+                </div>
+
+                <!-- 文件列表 -->
+                <div class="file-list" id="fileList">
+                    <h3><i class="fas fa-file-alt"></i> 待处理文件</h3>
+                    <div class="file-list-content" id="fileListContent">
+                        <p class="empty-message">暂无文件</p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 处理按钮 -->
+            <div class="action-section">
+                <button id="processBtn" class="btn btn-success" disabled>
+                    <i class="fas fa-magic"></i> 开始识别转换
+                </button>
+                <button id="clearBtn" class="btn btn-outline">
+                    <i class="fas fa-trash"></i> 清空列表
+                </button>
+            </div>
+
+            <!-- 预览区域 -->
+            <div class="preview-section">
+                <div class="preview-container">
+                    <!-- 图像预览 -->
+                    <div class="image-preview">
+                        <h3><i class="fas fa-image"></i> 图片预览</h3>
+                        <div class="preview-content" id="imagePreview">
+                            <div class="preview-placeholder">
+                                <i class="fas fa-image"></i>
+                                <p>选择图片后显示预览</p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- 表格预览 -->
+                    <div class="table-preview">
+                        <h3><i class="fas fa-table"></i> 表格预览</h3>
+                        <div class="preview-content" id="tablePreview">
+                            <div class="preview-placeholder">
+                                <i class="fas fa-table"></i>
+                                <p>识别结果将显示在这里</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 结果区域 -->
+            <div class="result-section" id="resultSection" style="display: none;">
+                <h3><i class="fas fa-check-circle"></i> 转换结果</h3>
+                <div class="result-info">
+                    <div class="result-card">
+                        <div class="result-icon success">
+                            <i class="fas fa-file-excel"></i>
+                        </div>
+                        <div class="result-details">
+                            <h4>转换成功！</h4>
+                            <div class="result-stats">
+                                <span class="stat">
+                                    <i class="fas fa-list-alt"></i>
+                                    <span>行数: <strong id="rowCount">0</strong></span>
+                                </span>
+                                <span class="stat">
+                                    <i class="fas fa-columns"></i>
+                                    <span>列数: <strong id="colCount">0</strong></span>
+                                </span>
+                                <span class="stat">
+                                    <i class="fas fa-database"></i>
+                                    <span>单元格: <strong id="cellCount">0</strong></span>
+                                </span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="download-section">
+                        <a id="downloadLink" class="btn btn-download" target="_blank">
+                            <i class="fas fa-download"></i> 下载 Excel 文件
+                        </a>
+                        <button id="processAnother" class="btn btn-outline">
+                            <i class="fas fa-redo"></i> 处理新文件
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </main>
+
+        <!-- 底部信息 -->
+        <footer class="footer">
+            <div class="footer-content">
+                <div class="tech-stack">
+                    <span class="tech-badge">FastAPI</span>
+                    <span class="tech-badge">PaddleOCR</span>
+                    <span class="tech-badge">OpenCV</span>
+                    <span class="tech-badge">Pandas</span>
+                </div>
+                <p class="copyright">
+                    © 2024 表格识别工具 | 支持中文表格识别 | 完全免费使用
+                </p>
+            </div>
+        </footer>
+    </div>
+
+    <!-- 加载动画 -->
+    <div class="loading-overlay" id="loadingOverlay">
+        <div class="loading-content">
+            <div class="spinner"></div>
+            <h3>正在处理中...</h3>
+            <p id="loadingMessage">请稍候，正在识别表格内容</p>
+            <div class="progress-bar">
+                <div class="progress-fill" id="progressFill"></div>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/toastify-js/1.12.0/toastify.min.js"></script>
+    <script src="app.js"></script>
+</body>
+</html>
